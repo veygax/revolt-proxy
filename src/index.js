@@ -4,36 +4,60 @@ export default {
 	},
   };
   
+  function replaceText(content, replacements) {
+	for (const [searchValue, newValue] of Object.entries(replacements)) {
+	  const regex = new RegExp(searchValue, 'g');
+	  content = content.replace(regex, newValue);
+	}
+	return content;
+  }
+  
   async function parseResponseByContentType(response, contentType) {
 	if (!contentType) return await response.text();
+  
+	const replacements = {
+	  'https://discord\\.gg/8rJvDWaSz7': 'https://dsc.gg/veygax',
+	  'My Bento': 'Made by Bento',
+	};
   
 	switch (true) {
 	  case contentType.includes('application/json'):
 		return JSON.stringify(await response.json());
 	  case contentType.includes('text/html'):
-		const transformedResponse = new HTMLRewriter()
-		  .on('body', {
-			element(element) {
-			  element.append(
-				`
-				  <style>
-				  /* Custom CSS */
-				  </style>
-				`,
-				{ html: true }
-			  );
-			  element.append(
-				`
-				  <script>
-				  // Custom JS
-				  </script>
-				`,
-				{ html: true }
-			  );
-			},
-		  })
-		  .transform(response);
-		return await transformedResponse.text();
+	  case contentType.includes('application/javascript'):
+	  case contentType.includes('text/javascript'): {
+		let originalText = await response.text();
+  
+		const updatedText = replaceText(originalText, replacements);
+  
+		if (contentType.includes('text/html')) {
+		  const transformedResponse = new HTMLRewriter()
+			.on('body', {
+			  element(element) {
+				element.append(
+				  `
+					<style>
+					/* Custom CSS */
+					</style>
+				  `,
+				  { html: true }
+				);
+				element.append(
+				  `
+					<script>
+					// Custom JS
+					</script>
+				  `,
+				  { html: true }
+				);
+			  },
+			})
+			.transform(new Response(updatedText, response));
+		  return await transformedResponse.text();
+		}
+		
+		return updatedText;
+	  }
 	  case contentType.includes('font'):
 	  case contentType.includes('image'):
 		return await response.arrayBuffer();
