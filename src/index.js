@@ -18,6 +18,7 @@ export default {
 	const replacements = {
 	  'https://discord\\.gg/8rJvDWaSz7': 'https://dsc.gg/veygax',
 	  'My Bento': 'Made by Bento',
+	  'https://storage.googleapis.com/creatorspace-public/users%2Fcm12hue9s01o8sk016zddtr46%2F4qOYTn3HnEsITwkL-dark%252Cen%252Cbadge%252Cgroup.png': 'https://card.yuy1n.io/card/76561199197283635/dark,en,badge,group',
 	};
   
 	switch (true) {
