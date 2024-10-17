@@ -73,9 +73,9 @@ export default {
 
 	if (path.startsWith('/rchat')) {
 		path = path.replace('/rchat', '/api');
-		targetUrl = `https://app.revolt.chat${path}`;
+		url = `https://app.revolt.chat${path}`;
 	  } else {
-		targetUrl = `https://app.revolt.chat${path}`;
+		url = `https://app.revolt.chat${path}`;
 	  }
 
 	if (path === '/') {
