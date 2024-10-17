@@ -16,7 +16,7 @@ export default {
 	if (!contentType) return await response.text();
   
 	const replacements = {
-	  'https://app.revolt.chat/api': 'https://revolt.veygax.dev/api',
+	  'https://app.revolt.chat/api': 'https://revolt.veygax.dev/rchat',
 	
 	};
   
@@ -67,9 +67,16 @@ export default {
   }
   
   async function handleRequest(request, env) {
-	const path = new URL(request.url).pathname;
+	let path = new URL(request.url).pathname;
 	let url = 'https://app.revolt.chat' + path;
   
+
+	if (path.startsWith('/rchat')) {
+		path = path.replace('/rchat', '/api');
+		targetUrl = `https://app.revolt.chat${path}`;
+	  } else {
+		targetUrl = `https://app.revolt.chat${path}`;
+	  }
 
 	if (path === '/') {
 		url = `https://app.revolt.chat/`;

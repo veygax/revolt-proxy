@@ -111,3 +111,7 @@ BASE_URL = "https://revolt.veygax.dev"
 routes = [
   { pattern = "veygax.dev", custom_domain = true }
 ]
+
+[observability]
+enabled = true
+head_sampling_rate = 1
