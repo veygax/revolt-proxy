@@ -16,70 +16,76 @@ export default {
 	if (!contentType) return await response.text();
   
 	const replacements = {
-	  'https://app.revolt.chat/api': 'https://revolt.veygax.dev/rchat',
-	
+	  'https://app.revolt.chat': 'https://revolt.veygax.dev',
+	  'https://rvlt.gg': 'https://revolt.veygax.dev/rvltgg',
 	};
   
 	switch (true) {
-	  case contentType.includes('application/json'):
-		return JSON.stringify(await response.json());
-	  case contentType.includes('text/html'):
-	  case contentType.includes('application/javascript'):
-	  case contentType.includes('text/javascript'): {
-		let originalText = await response.text();
-  
-		const updatedText = replaceText(originalText, replacements);
-  
-		if (contentType.includes('text/html')) {
-		  const transformedResponse = new HTMLRewriter()
-			.on('body', {
-			  element(element) {
-				element.append(
-				  `
-					<style>
-					/* Custom CSS */
-					</style>
-				  `,
-				  { html: true }
-				);
-				element.append(
-				  `
-					<script>
-					// Custom JS
-					</script>
-				  `,
-				  { html: true }
-				);
-			  },
-			})
-			.transform(new Response(updatedText, response));
-		  return await transformedResponse.text();
+		case contentType.includes('application/json'): {
+			const jsonData = await response.json();
+			
+			if (Array.isArray(jsonData)) {
+				return JSON.stringify({ messages: jsonData, users: [] });
+			  }
+		  
+			return JSON.stringify(jsonData); 
+		  }
+		case contentType.includes('text/html'):
+		case contentType.includes('application/javascript'):
+		case contentType.includes('text/javascript'): {
+		  let originalText = await response.text();
+	
+		  const updatedText = replaceText(originalText, replacements);
+	
+		  if (contentType.includes('text/html')) {
+			const transformedResponse = new HTMLRewriter()
+			  .on('body', {
+				element(element) {
+				  element.append(
+					`
+					  <style>
+					  /* Custom CSS */
+					  </style>
+					`,
+					{ html: true }
+				  );
+				  element.append(
+					`
+					  <script>
+					  // Custom JS
+					  </script>
+					`,
+					{ html: true }
+				  );
+				},
+			  })
+			  .transform(new Response(updatedText, response));
+			return await transformedResponse.text();
+		  }
+		  
+		  return updatedText;
 		}
-		
-		return updatedText;
+		case contentType.includes('font'):
+		case contentType.includes('image'):
+		  return await response.arrayBuffer();
+		default:
+		  return await response.text();
 	  }
-	  case contentType.includes('font'):
-	  case contentType.includes('image'):
-		return await response.arrayBuffer();
-	  default:
-		return await response.text();
-	}
   }
   
   async function handleRequest(request, env) {
 	let path = new URL(request.url).pathname;
 	let url = 'https://app.revolt.chat' + path;
   
-
-	if (path.startsWith('/rchat')) {
-		path = path.replace('/rchat', '/api');
-		url = `https://app.revolt.chat${path}`;
+	if (path.startsWith('/rvltgg')) {
+		url = 'https://rvlt.gg' + path.replace('/rvltgg', '');
 	  } else {
-		url = `https://app.revolt.chat${path}`;
+		url = 'https://app.revolt.chat' + path;
 	  }
 
+	  
 	if (path === '/') {
-		url = `https://app.revolt.chat/`;
+	  url = `https://app.revolt.chat/`;
 	}
   
 	let headers = {
@@ -88,17 +94,17 @@ export default {
 	};
   
 	const response = await fetch(url, {
-		method: 'GET',
-		headers: {
-		  'Accept': '*/*',
-		},
-	  });
-	  
+	  method: request.method,
+	  headers: request.headers,
+	  body: request.method === 'POST' ? request.body : undefined, 
+	});
+
 	const contentType = response.headers.get('content-type');
 	let results = await parseResponseByContentType(response, contentType);
-
+  
 	headers['content-type'] = contentType;
   
 	return new Response(results, { headers });
   }
+  
   
