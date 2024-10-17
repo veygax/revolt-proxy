@@ -12,7 +12,7 @@ export default {
 	return content;
   }
   
-  async function parseResponseByContentType(response, contentType) {
+  async function parseResponseByContentType(response, contentType, path) {
 	if (!contentType) return await response.text();
   
 	const replacements = {
@@ -24,9 +24,9 @@ export default {
 		case contentType.includes('application/json'): {
 			const jsonData = await response.json();
 			
-			if (Array.isArray(jsonData)) {
+			if (path.endsWith('/messages') && Array.isArray(jsonData)) {
 				return JSON.stringify({ messages: jsonData, users: [] });
-			  }
+			}
 		  
 			return JSON.stringify(jsonData); 
 		  }
@@ -100,7 +100,7 @@ export default {
 	});
 
 	const contentType = response.headers.get('content-type');
-	let results = await parseResponseByContentType(response, contentType);
+	let results = await parseResponseByContentType(response, contentType, path);
   
 	headers['content-type'] = contentType;
   
