@@ -3,7 +3,7 @@ export default {
 	  return await handleRequest(request, env);
 	},
   };
-  
+
   function replaceText(content, replacements) {
 	for (const [searchValue, newValue] of Object.entries(replacements)) {
 	  const regex = new RegExp(searchValue, 'g');
@@ -16,9 +16,8 @@ export default {
 	if (!contentType) return await response.text();
   
 	const replacements = {
-	  'https://discord\\.gg/8rJvDWaSz7': 'https://dsc.gg/veygax',
-	  'My Bento': 'Made by Bento',
-	  'https://storage.googleapis.com/creatorspace-public/users%2Fcm12hue9s01o8sk016zddtr46%2F4qOYTn3HnEsITwkL-dark%252Cen%252Cbadge%252Cgroup.png': 'https://card.yuy1n.io/card/76561199197283635/dark,en,badge,group',
+	  'https://app.revolt.chat/api': 'https://revolt.veygax.dev/api',
+	
 	};
   
 	switch (true) {
@@ -69,14 +68,11 @@ export default {
   
   async function handleRequest(request, env) {
 	const path = new URL(request.url).pathname;
-	let url = 'https://bento.me' + path;
+	let url = 'https://app.revolt.chat' + path;
   
-	if (path.includes('v1')) {
-	  url = 'https://api.bento.me' + path;
-	}
-  
-	if (url === 'https://bento.me/') {
-	  url = `https://bento.me/${env.BENTO_USERNAME}`;
+
+	if (path === '/') {
+		url = `https://app.revolt.chat/`;
 	}
   
 	let headers = {
@@ -84,14 +80,16 @@ export default {
 	  'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
 	};
   
-	const response = await fetch(url, { headers });
+	const response = await fetch(url, {
+		method: 'GET',
+		headers: {
+		  'Accept': '*/*',
+		},
+	  });
+	  
 	const contentType = response.headers.get('content-type');
 	let results = await parseResponseByContentType(response, contentType);
-  
-	if (!(results instanceof ArrayBuffer)) {
-	  results = results.replaceAll('https://api.bento.me', env.BASE_URL);
-	}
-  
+
 	headers['content-type'] = contentType;
   
 	return new Response(results, { headers });

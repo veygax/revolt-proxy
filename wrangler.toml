@@ -1,5 +1,5 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "bento"
+name = "revolt"
 main = "src/index.js"
 compatibility_date = "2024-09-19"
 compatibility_flags = ["nodejs_compat"]
@@ -17,8 +17,7 @@ compatibility_flags = ["nodejs_compat"]
 # Note: Use secrets to store sensitive data.
 # - https://developers.cloudflare.com/workers/configuration/secrets/
 [vars]
-BENTO_USERNAME = "veygax"
-BASE_URL = "https://veygax.dev" # the custom domain you'll use
+BASE_URL = "https://revolt.veygax.dev"
 
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
